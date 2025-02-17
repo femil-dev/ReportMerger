@@ -83,23 +83,23 @@ def append_to_excel(data_row, output_file, sheet_name):
         
         # Write main headers and subheaders for Sheet 1
         if sheet_name == "Sheet 1":
-            main_headers = ["REPORT NAME", "REPORT PATH", "REPORT DataItem", "REPORT Datasource", "REPORT Data Filters"]
-            subheaders = ["Name of the report", "Report Path", "Report DataItem", "Report DataSource", "Report Data Filters"]
+            main_headers = ["REPORT NAME", "REPORT PATH", "REPORT Datasource", "REPORT DataItem", "REPORT Data Filters"]
+            subheaders = ["Name of the report", "Report Path", "Report DataSource", "Report DataItem", "Report Data Filters"]
             sheet.append(main_headers)  # Append main headers
             sheet.append(subheaders)    # Append subheaders
         
         # Write main headers and subheaders for Sheet 2
         elif sheet_name == "Sheet 2":
-            main_headers = ["REPORT NAME", "DataItem Matched", "DataItem Match %", "Data Filters Matched", 
-                            "Data Filters Match %", "Datasource Matched", "Datasource Match %", "Overall Match (%)"]
+            main_headers = ["REPORT NAME", "Datasource Matched", "Datasource Match %", "DataItem Matched", "DataItem Match %", "Data Filters Matched", 
+                            "Data Filters Match %", "Overall Match (%)"]
             subheaders = [
                 "REPORTS COMBINED", 
+                "Datasource Matched", 
+                "Shows the percentage match between report Datasource", 
                 "DataItem Matched", 
                 "Shows the percentage match between report data items", 
                 "Data Filters Matched", 
                 "Shows the percentage match between report data filters", 
-                "Datasource Matched", 
-                "Shows the percentage match between report Datasource", 
                 "Shows the overall report matching percentage"
             ]
             sheet.append(main_headers)  # Append main headers
@@ -128,7 +128,7 @@ def append_to_excel(data_row, output_file, sheet_name):
         for cell in sheet[2]:  # The second row (subheaders)
             cell.fill = subheader_fill
             cell.font = subheader_font
-            cell.alignment = Alignment(horizontal='center', vertical='center')  # Center align text
+            cell.alignment = Alignment(horizontal='left', vertical='center')  # Center align text
             cell.border = border  # Apply border to subheader cells
 
     # Write the data row to the sheet (append the data row)
@@ -194,9 +194,11 @@ def compare_and_combine_columns(file_path1, file_path2):
     matched_dataItems = list(set(dataItem_file1).intersection(dataItem_file2))
     matched_dataFilters = list(set(dataFilter_file1).intersection(dataFilter_file2))
     matched_dataSources = list(set(dataSourcefile1).intersection(dataSourcefile2))
-
-    # Calculate overall matching percentage as the average of the three
-    overall_matching_percentage = (matching_percentage_dataItems + matching_percentage_dataFilters + matching_percentage_dataSources) / 3
+    # Round the percentages to 2 decimal places
+    matching_percentage_dataItems = round(matching_percentage_dataItems, 2)
+    matching_percentage_dataFilters = round(matching_percentage_dataFilters, 2)
+    matching_percentage_dataSources = round(matching_percentage_dataSources, 2)
+    overall_matching_percentage = round((matching_percentage_dataItems + matching_percentage_dataFilters + matching_percentage_dataSources) / 3, 2)
 
     # If overall matching percentage is less than 75%, do not merge
     if overall_matching_percentage < 75:
@@ -217,8 +219,8 @@ def compare_and_combine_columns(file_path1, file_path2):
     data_row_sheet1_file1 = [
         file_name1,
         report_path1,
-        ",\n".join(dataItem_file1),  # Join DataItems with a line break
         ",\n".join(dataSourcefile1),  # Join Datasources with a line break
+        ",\n".join(dataItem_file1),  # Join DataItems with a line break
         ",\n".join(dataFilter_file1)  # Join DataFilters with a line break
     ]
 
@@ -227,20 +229,20 @@ def compare_and_combine_columns(file_path1, file_path2):
     data_row_sheet1_file2 = [
         file_name2,
         report_path2,
-        ",\n".join(dataItem_file2),  # Join DataItems with a line break
         ",\n".join(dataSourcefile2),  # Join Datasources with a line break
+        ",\n".join(dataItem_file2),  # Join DataItems with a line break
         ",\n".join(dataFilter_file2)  # Join DataFilters with a line break
     ]
 
     # Prepare the data row for Sheet 2
     data_row_sheet2 = [
         report_name,
+        matched_dataSources_str,
+        matching_percentage_dataSources,
         matched_dataItems_str,
         matching_percentage_dataItems,
         matched_dataFilters_str,
         matching_percentage_dataFilters,
-        matched_dataSources_str,
-        matching_percentage_dataSources,
         overall_matching_percentage
     ]
 
